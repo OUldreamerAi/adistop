@@ -11,8 +11,12 @@
         "default_popup": "popup.html",
         "default_icon": {
             "16": "edit.png"
-
-
         }
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ]
 }
