@@ -1,22 +1,16 @@
+
+
 {
     "manifest_version": 3,
     "name": "Chrome Exetension",
     "version": "1.0",
     "description": "A chrome exetension, which stops you from entering websites like youtube and makes you firs read a wiokibedia article and answer questions about it.",
-    "permissions": [
-        "activeTab",
-        "scripting"
-    ],
-    "actions": {
-        "default_popup": "popup.html",
-        "default_icon": {
-            "16": "edit.png"
-        }
-    },
+    "permissions": ["activeTab", "scripting"],
+    "action": { "default_popup": "popup.html", "default_icon": { "16": "edit.png"} },
     "content_scripts": [
-        {
-            "matches": ["<all_urls>"],
-            "js": ["content.js"]
-        }
-    ]
+    {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+    }
+  ]
 }
