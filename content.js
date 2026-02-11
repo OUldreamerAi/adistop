@@ -56,7 +56,7 @@ async function showWikipediaOverlay() {
         opacity: 1;
     `;
     
-    // Create white box for Wikipedia content
+
     const wikiBox = document.createElement("div");
     wikiBox.id = "wiki-content";
     wikiBox.style.cssText = `
@@ -97,63 +97,110 @@ async function showWikipediaOverlay() {
         
         const wikiContent = document.getElementById('wiki-content');
         
- 
-        wikiContent.querySelectorAll('*').forEach(element => {
-            element.style.opacity = '1';
-            element.style.filter = 'none';
-            element.style.fontFamily = 'Georgia, serif';
-            element.style.fontSize = '16px';
-            element.style.lineHeight = '1.6';
-            element.style.color = '#000';
-            element.style.backgroundColor = 'transparent';
-            element.style.margin = '';
-            element.style.padding = '';
-        });
-        
-  
-        wikiContent.querySelectorAll('p').forEach(p => {
-            p.style.marginBottom = '1em';
-            p.style.display = 'block';
-        });
-        
 
-        wikiContent.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
-            heading.style.fontWeight = 'bold';
-            heading.style.marginTop = '1em';
-            heading.style.marginBottom = '0.5em';
-            heading.style.display = 'block';
-        });
-        
- 
-        wikiContent.querySelectorAll('img').forEach(img => {
-            img.style.opacity = '1';
-            img.style.filter = 'none';
-            img.style.maxWidth = '100%';
-            img.style.height = 'auto';
-            img.style.display = 'block';
-            if (img.getAttribute('data-src')) {
-                img.src = img.getAttribute('data-src');
-            }
-        });
-        
+    wikiContent.querySelectorAll('*').forEach(element => {
+        element.style.opacity = '1';
+        element.style.filter = 'none';
+        element.style.fontFamily = 'Georgia, serif';
+        element.style.lineHeight = '1.6';
+        element.style.color = '#000';
+        element.style.backgroundColor = 'transparent';
+    });
+    
 
-        wikiContent.querySelectorAll('a').forEach(link => {
-            link.style.color = '#0645ad';
-            link.style.opacity = '1';
-            link.style.textDecoration = 'underline';
-        });
-        
-        // Fix lists
-        wikiContent.querySelectorAll('ul, ol').forEach(list => {
-            list.style.marginLeft = '2em';
-            list.style.marginBottom = '1em';
-            list.style.display = 'block';
-        });
-        
-        wikiContent.querySelectorAll('li').forEach(li => {
-            li.style.display = 'list-item';
-            li.style.marginBottom = '0.5em';
-        });
+    wikiContent.querySelectorAll('p').forEach(p => {
+        p.style.fontSize = '16px';
+        p.style.marginBottom = '1em';
+        p.style.display = 'block';
+    });
+    
+ 
+    wikiContent.querySelectorAll('h1').forEach(h => {
+        h.style.fontSize = '32px';
+        h.style.fontWeight = 'bold';
+        h.style.marginTop = '1em';
+        h.style.marginBottom = '0.5em';
+        h.style.display = 'block';
+    });
+    
+    wikiContent.querySelectorAll('h2').forEach(h => {
+        h.style.fontSize = '28px';
+        h.style.fontWeight = 'bold';
+        h.style.marginTop = '1em';
+        h.style.marginBottom = '0.5em';
+        h.style.display = 'block';
+    });
+    
+    wikiContent.querySelectorAll('h3').forEach(h => {
+        h.style.fontSize = '24px';
+        h.style.fontWeight = 'bold';
+        h.style.marginTop = '0.8em';
+        h.style.marginBottom = '0.4em';
+        h.style.display = 'block';
+    });
+    
+    wikiContent.querySelectorAll('h4').forEach(h => {
+        h.style.fontSize = '20px';
+        h.style.fontWeight = 'bold';
+        h.style.marginTop = '0.8em';
+        h.style.marginBottom = '0.4em';
+        h.style.display = 'block';
+    });
+    
+    wikiContent.querySelectorAll('h5, h6').forEach(h => {
+        h.style.fontSize = '18px';
+        h.style.fontWeight = 'bold';
+        h.style.marginTop = '0.8em';
+        h.style.marginBottom = '0.4em';
+        h.style.display = 'block';
+    });
+    
+
+    wikiContent.querySelectorAll('img').forEach(img => {
+        img.style.opacity = '1';
+        img.style.filter = 'none';
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        img.style.display = 'block';
+        if (img.getAttribute('data-src')) {
+            img.src = img.getAttribute('data-src');
+        }
+    });
+    
+
+wikiContent.querySelectorAll('a').forEach(link => {
+    link.style.color = '#0645ad';
+    link.style.opacity = '1';
+    link.style.textDecoration = 'underline';
+    link.style.fontSize = '16px';
+    
+    let href = link.getAttribute('href');
+    if (href && href.startsWith('/wiki/')) {
+        link.setAttribute('href', `https://en.wikipedia.org${href}`);
+    } else if (href && href.startsWith('#')) {
+        link.removeAttribute('href');
+        link.style.cursor = 'default';
+        link.style.textDecoration = 'none';
+        link.style.color = '#000';
+    }
+    
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+});
+    
+
+    wikiContent.querySelectorAll('ul, ol').forEach(list => {
+        list.style.marginLeft = '2em';
+        list.style.marginBottom = '1em';
+        list.style.display = 'block';
+        list.style.fontSize = '16px';
+    });
+    
+    wikiContent.querySelectorAll('li').forEach(li => {
+        li.style.display = 'list-item';
+        li.style.marginBottom = '0.5em';
+        li.style.fontSize = '16px';
+    });
     })
     .catch(e => {
         document.getElementById('wiki-content').innerText = "Failed to load Wikipedia article.";
