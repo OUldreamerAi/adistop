@@ -1,3 +1,27 @@
 
+document.addEventListener('DOMContentLoaded', async () => {
+    const data = await chrome.storage.local.get(['bannedSites', 'unbannedSites']);
+    console.log('Current banned sites:', data.bannedSites || []);
+});
 
+
+document.getElementById('activateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const url = document.getElementById('fname').value.trim();
+    if (!url) return;
+    
+    const data = await chrome.storage.local.get(['bannedSites']);
+    const bannedSites = data.bannedSites || [];
+    
+    if (!bannedSites.includes(url)) {
+        bannedSites.push(url);
+        await chrome.storage.local.set({ bannedSites });
+        alert(`${url} is now blocked!`);
+    } else {
+        alert(`${url} is already blocked.`);
+    }
+    
+    document.getElementById('fname').value = '';
+});
 

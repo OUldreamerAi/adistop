@@ -1,10 +1,44 @@
 
-
-const currentUrl = window.location.href;
-
-if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.org/get-kali/#kali-platforms")) {
+async function checkIfBanned() {
+    const currentUrl = window.location.href;
     
-    // Create overlay
+    const data = await chrome.storage.local.get(['bannedSites', 'unbannedSites']);
+    const bannedSites = data.bannedSites || [];
+    const unbannedSites = data.unbannedSites || {};
+
+    let isBanned = false;
+    let matchedSite = null;
+    
+    for (const site of bannedSites) {
+        if (currentUrl.includes(site)) {
+            matchedSite = site;
+            
+            if (unbannedSites[site]) {
+                const unbanTime = unbannedSites[site];
+                
+                if (Date.now() >= unbanTime) {
+                    const updatedBanned = bannedSites.filter(s => s !== site);
+                    delete unbannedSites[site];
+                    
+                    await chrome.storage.local.set({ 
+                        bannedSites: updatedBanned,
+                        unbannedSites: unbannedSites
+                    });
+                    
+                    console.log(`${site} has been unbanned!`);
+                    return false; 
+                }
+            }
+            
+            isBanned = true;
+            break;
+        }
+    }
+    
+    return isBanned;
+}
+
+async function showWikipediaOverlay() {
     const overlay = document.createElement("div");
     overlay.style.cssText = `
         position: fixed;
@@ -12,14 +46,13 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
+        background-color: rgb(0, 0, 0);
         display: flex;
         justify-content: center;
         align-items: center;
         z-index: 9999;
         pointer-events: auto;
         opacity: 1;
-        
     `;
     
     // Create white box for Wikipedia content
@@ -32,9 +65,9 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
         width: 120vh;
         max-height: 90vh;
         overflow-y: auto;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.7 );
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.7);
         opacity: 1;
-        z-index: 10000; 
+        z-index: 10000;
     `;
     wikiBox.innerHTML = `<p>Loading Wikipedia article...</p>`;
     
@@ -47,37 +80,32 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
     .then(response => response.json())
     .then(data => {
         const title = data.title;
-        // Fetch full parsed content
         const apiUrl = `https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&format=json&origin=*`;
         return fetch(apiUrl);
     })
     .then(response => response.json())
     .then(data => {
-        const wikiContent = document.getElementById('wiki-content');
-        wikiContent.innerHTML = `
+        document.getElementById('wiki-content').innerHTML = `
             <h1>Read this text about <span style="color: #ff0000"> ${data.parse.title} </span> and answer the questions to use this website.</h1>
             ${data.parse.text['*']}
         `;
-
-
-
-        // Fix all images
+        
+        const wikiContent = document.getElementById('wiki-content');
+        
         wikiContent.querySelectorAll('img').forEach(img => {
             img.style.opacity = '1';
             img.style.filter = 'none';
-            // Fix lazy loading
+
             if (img.getAttribute('data-src')) {
                 img.src = img.getAttribute('data-src');
             }
         });
         
-        // Fix all text elements
+
         wikiContent.querySelectorAll('*').forEach(element => {
             element.style.opacity = '1';
-            //element.style.color = ''; // Reset to default brakes the red text, so we keep it as is
         });
         
-        // make links nout usable
         wikiContent.querySelectorAll('a').forEach(link => {
             link.style.color = '#050d33ff';
             link.style.opacity = '1';
@@ -86,6 +114,11 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
     })
     .catch(e => {
         document.getElementById('wiki-content').innerText = "Failed to load Wikipedia article.";
-        console.error(e);
     });
 }
+
+checkIfBanned().then(isBanned => {
+    if (isBanned) {
+        showWikipediaOverlay();
+    }
+});

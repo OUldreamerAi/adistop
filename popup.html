@@ -1,25 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <style>
- 
-        </style>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Adistop</title>
+        <link rel="stylesheet" href="popup.css">
     </head>
     <body>
         <h3>Adistop</h3>
         <div>
-            <form>
-                <label for="fname">Website(url) you would like to activate Adistop on.</label>
-                <input type="text" id="fname" name="fname">
-                <button type="submit">Submit</button>
+            <form id="activateForm">
+                <label for="fname">Website (URL) to block:</label>
+                <input type="text" id="fname" name="fname" placeholder="example.com">
+                <button type="submit">Block Site</button>
             </form>
         </div>
         <div>
-            <form>
-                <label for="lname">Website you would like to deactivate Adistop on:</label>
-                <input type="text" id="lname" name="lname">
-                <button type="submit">Submit</button>
+            <form id="deactivateForm">
+                <label for="lname">Website to unblock:</label>
+                <input type="text" id="lname" name="lname" placeholder="example.com">
+                <button type="submit">Unblock Site</button>
+                <p class="info">Sites unblock 1 hour after request</p>
             </form>
         </div>
+        <script src="popup.js"></script>
     </body>   
 </html>
