@@ -12,7 +12,7 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.7);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -53,12 +53,39 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('wiki-content').innerHTML = `
+        const wikiContent = document.getElementById('wiki-content');
+        wikiContent.innerHTML = `
             <h1>Read this text about <span style="color: #ff0000"> ${data.parse.title} </span> and answer the questions to use this website.</h1>
             ${data.parse.text['*']}
         `;
+
+
+
+        // Fix all images
+        wikiContent.querySelectorAll('img').forEach(img => {
+            img.style.opacity = '1';
+            img.style.filter = 'none';
+            // Fix lazy loading
+            if (img.getAttribute('data-src')) {
+                img.src = img.getAttribute('data-src');
+            }
+        });
+        
+        // Fix all text elements
+        wikiContent.querySelectorAll('*').forEach(element => {
+            element.style.opacity = '1';
+            //element.style.color = ''; // Reset to default brakes the red text, so we keep it as is
+        });
+        
+        // make links nout usable
+        wikiContent.querySelectorAll('a').forEach(link => {
+            link.style.color = '#050d33ff';
+            link.style.opacity = '1';
+            link.href = "#";
+        });
     })
     .catch(e => {
         document.getElementById('wiki-content').innerText = "Failed to load Wikipedia article.";
+        console.error(e);
     });
 }
