@@ -15,7 +15,7 @@ li:nth-child(odd) {
   background: #80808030;
 }
 li:nth-child(even) {
-    background: #ffffff;
+    background: #bc0a0a;
 }
 
 h3,
@@ -45,21 +45,20 @@ p {
     width: 80%; /* Could be more or less, depending on screen size */
 }
 
-.owelay {
+.overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.5);
-    display: "flex";
-    justify-content: "center";
+    background-color: rgba(255, 33, 33, 0.5);
+    display: flex;
     z-index: 9999;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     color: #333;
     font-size: 20px;
-    font-weight: "bold";
+    font-weight: bold;
     pointer-events: none;
 }
