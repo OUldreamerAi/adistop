@@ -41,16 +41,17 @@ async function checkIfBanned() {
 async function showWikipediaOverlay() {
     const overlay = document.createElement("div");
     overlay.style.cssText = `
+        all: initial;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.7);
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 9999;
+        z-index: 2147483647;
         pointer-events: auto;
         opacity: 1;
     `;
@@ -59,12 +60,14 @@ async function showWikipediaOverlay() {
     const wikiBox = document.createElement("div");
     wikiBox.id = "wiki-content";
     wikiBox.style.cssText = `
+        all: initial;
         background-color: rgb(255, 255, 255);
         padding: 30px;
         border-radius: 10px;
         width: 120vh;
         max-height: 90vh;
         overflow-y: auto;
+        z-index: 2147483647;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.7);
         opacity: 1;
         z-index: 10000;
@@ -87,29 +90,69 @@ async function showWikipediaOverlay() {
     .then(data => {
         document.getElementById('wiki-content').innerHTML = `
             <h1>Read this text about <span style="color: #ff0000"> ${data.parse.title} </span> and answer the questions to use this website.</h1>
-            ${data.parse.text['*']}
+            <div style="all: initial; display: block; font-family: Georgia, serif; font-size: 16px; line-height: 1.6; color: #000;">
+                ${data.parse.text['*']}
+            </div>
         `;
         
         const wikiContent = document.getElementById('wiki-content');
         
+ 
+        wikiContent.querySelectorAll('*').forEach(element => {
+            element.style.opacity = '1';
+            element.style.filter = 'none';
+            element.style.fontFamily = 'Georgia, serif';
+            element.style.fontSize = '16px';
+            element.style.lineHeight = '1.6';
+            element.style.color = '#000';
+            element.style.backgroundColor = 'transparent';
+            element.style.margin = '';
+            element.style.padding = '';
+        });
+        
+  
+        wikiContent.querySelectorAll('p').forEach(p => {
+            p.style.marginBottom = '1em';
+            p.style.display = 'block';
+        });
+        
+
+        wikiContent.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
+            heading.style.fontWeight = 'bold';
+            heading.style.marginTop = '1em';
+            heading.style.marginBottom = '0.5em';
+            heading.style.display = 'block';
+        });
+        
+ 
         wikiContent.querySelectorAll('img').forEach(img => {
             img.style.opacity = '1';
             img.style.filter = 'none';
-
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
             if (img.getAttribute('data-src')) {
                 img.src = img.getAttribute('data-src');
             }
         });
         
 
-        wikiContent.querySelectorAll('*').forEach(element => {
-            element.style.opacity = '1';
+        wikiContent.querySelectorAll('a').forEach(link => {
+            link.style.color = '#0645ad';
+            link.style.opacity = '1';
+            link.style.textDecoration = 'underline';
         });
         
-        wikiContent.querySelectorAll('a').forEach(link => {
-            link.style.color = '#050d33ff';
-            link.style.opacity = '1';
-            link.href = "#";
+        // Fix lists
+        wikiContent.querySelectorAll('ul, ol').forEach(list => {
+            list.style.marginLeft = '2em';
+            list.style.marginBottom = '1em';
+            list.style.display = 'block';
+        });
+        
+        wikiContent.querySelectorAll('li').forEach(li => {
+            li.style.display = 'list-item';
+            li.style.marginBottom = '0.5em';
         });
     })
     .catch(e => {
