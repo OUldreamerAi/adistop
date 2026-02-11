@@ -10,17 +10,30 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 const currentUrl = window.location.href;
 
 if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.org/get-kali/#kali-platforms")) {
-
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = chrome.runtime.getURL("popup.css"); // Adjust this path if necessary
-
-    document.head.appendChild(link);
     
     const overlay = document.createElement("div");
-    overlay.classList.add("overlay");
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 33, 33, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        pointer-events: no;
+    `;
+    
     const badge = document.createElement("p");
-    badge.textContent = `⏱️ uhweguiyrtwq vt2    uhg 2ty o8rvt gu24quyiogr4ucivgqycr4yh8ghc4rgyr 4gy7cqrt34cr4gcr4guytgucqrwgiuyqcgiyrwcf tgiy min read`;
+    badge.textContent = "⏱️ Test overlay - it works!";
+    badge.style.cssText = `
+        color: #333;
+        font-size: 20px;
+        font-weight: bold;
+    `;
+    
     overlay.appendChild(badge);
     document.body.appendChild(overlay);
 }
