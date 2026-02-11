@@ -12,7 +12,7 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgb(0, 0, 0);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -26,14 +26,15 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
     const wikiBox = document.createElement("div");
     wikiBox.id = "wiki-content";
     wikiBox.style.cssText = `
-        background-color: rgba(255, 255, 255, 1);
+        background-color: rgb(255, 255, 255);
         padding: 30px;
         border-radius: 10px;
         width: 120vh;
         max-height: 90vh;
         overflow-y: auto;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.7);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.7 );
         opacity: 1;
+        z-index: 10000; 
     `;
     wikiBox.innerHTML = `<p>Loading Wikipedia article...</p>`;
     
@@ -53,7 +54,7 @@ if (currentUrl.includes("example.com") || currentUrl.includes("https://www.kali.
     .then(response => response.json())
     .then(data => {
         document.getElementById('wiki-content').innerHTML = `
-            <h1>${data.parse.title}</h1>
+            <h1>Read this text about <span style="color: #ff0000"> ${data.parse.title} </span> and answer the questions to use this website.</h1>
             ${data.parse.text['*']}
         `;
     })
