@@ -40,6 +40,58 @@ async function checkIfBanned() {
     return isBanned;
 }
 
+
+function generateQuizUI(questionsText) {
+    const questionBlocks = questionsText.split(/Q\d+:/).filter(q => q.trim());
+    
+    let quizHTML = `
+        <h2 style="all: initial; display: block; font-size: 28px; font-weight: bold; margin-bottom: 25px; color: #fff; font-family: Georgia, serif; text-align: center;">
+            Answer These Questions to Continue
+        </h2>
+    `;
+    
+    questionBlocks.forEach((block, index) => {
+        const lines = block.trim().split('\n').filter(l => l.trim());
+        const questionText = lines[0].trim();
+        const options = lines.filter(l => /^[A-D]\)/.test(l.trim()));
+        const correctLine = lines.find(l => l.startsWith('Correct:'));
+        const correctAnswer = correctLine ? correctLine.split(':')[1].trim() : 'A';
+        
+        quizHTML += `
+            <div class="quiz-question" data-question="${index}" data-correct="${correctAnswer}" style="all: initial; display: block; background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <p style="all: initial; display: block; font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; font-family: Georgia, serif;">
+                    ${index + 1}. ${questionText}
+                </p>
+                <div class="options" style="all: initial; display: block;">
+        `;
+        
+        options.forEach(option => {
+            const letter = option.charAt(0);
+            const text = option.substring(2).trim();
+            quizHTML += `
+                <button class="quiz-option" data-option="${letter}" style="all: initial; display: block; width: 100%; text-align: left; padding: 15px 20px; margin-bottom: 10px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; font-family: Georgia, serif; color: #333; cursor: pointer; transition: all 0.3s ease;">
+                    <span style="all: initial; display: inline; font-weight: bold; margin-right: 10px; color: #667eea;">${letter})</span> ${text}
+                </button>
+            `;
+        });
+        
+        quizHTML += `
+            </div>
+                <p class="feedback" style="all: initial; display: none; margin-top: 10px; padding: 10px; border-radius: 5px; font-family: Georgia, serif; font-size: 14px;"></p>
+            </div>
+        `;
+    });
+    
+    quizHTML += `
+        <button id="submit-quiz" style="all: initial; display: block; width: 100%; padding: 18px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; font-family: Georgia, serif; cursor: pointer; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); opacity: 0.5;">
+            ✓ Submit Answers (0/${questionBlocks.length})
+        </button>
+    `;
+    
+    return quizHTML;
+}
+
+
 async function showWikipediaOverlay() {
     const overlay = document.createElement("div");
     overlay.style.cssText = `
@@ -80,7 +132,7 @@ async function showWikipediaOverlay() {
     document.body.appendChild(overlay);
 
     const client = new OpenRouter({
-        apiKey: "YOUR_API_KEY",
+        apiKey: "sk-hc-v1-84642dca3ba74c4e8e92aaada87d84ff83447ce3f33a495b97da9dfe0e4f5d82",
         serverURL: "https://ai.hackclub.com/proxy/v1",
     });
 
@@ -104,11 +156,21 @@ async function showWikipediaOverlay() {
     .then(response => response.json())
     .then(data => {
         document.getElementById('wiki-content').innerHTML = `
-            <h1>Read this text about <span style="color: #ff0000"> ${data.parse.title} </span> and answer the questions to use this website.</h1>
-            <div style="all: initial; display: block; font-family: Georgia, serif; font-size: 16px; line-height: 1.6; color: #000;">
-                ${data.parse.text['*']} ${response.choices[0].message.content}
-            </div>
-        `;
+            <h1 style="all: initial; display: block; font-size: 32px; font-weight: bold; margin-bottom: 20px; color: #000; font-family: Georgia, serif;">
+                Read this text about <span style="color: #ff0000; font-weight: bold;"> ${title} </span> and answer the questions to use this website.
+        </h1>
+        <div id="wiki-article" style="all: initial; display: block; font-family: Georgia, serif; font-size: 16px; line-height: 1.6; color: #000;">
+            ${fullData.parse.text['*']}
+        </div>
+        <div id="ai-questions" style="all: initial; display: block; margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="all: initial; display: block; font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #fff; font-family: Georgia, serif; text-align: center;">
+                Answer These Questions to use this webite
+            </h2>
+            <p style="all: initial; display: block; font-size: 18px; margin-bottom: 10px; color: #fff; font-family: Georgia, serif; text-align: center;">
+                Generating questions...
+            </p>
+        </div>
+`;
         
         const wikiContent = document.getElementById('wiki-content');
         
