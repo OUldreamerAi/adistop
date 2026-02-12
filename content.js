@@ -1,4 +1,6 @@
 
+import { OpenRouter } from "@openrouter/sdk";
+
 async function checkIfBanned() {
     const currentUrl = window.location.href;
     
@@ -76,6 +78,19 @@ async function showWikipediaOverlay() {
     
     overlay.appendChild(wikiBox);
     document.body.appendChild(overlay);
+
+    const client = new OpenRouter({
+        apiKey: "YOUR_API_KEY",
+        serverURL: "https://ai.hackclub.com/proxy/v1",
+    });
+
+    const airesponse = await client.chat.send({
+        model: "qwen/qwen3-32b",
+        messages: [
+    { role: "user", content: "Tell me a joke." },
+    ],
+    stream: false,
+    });
     
     const summaryUrl = "https://en.wikipedia.org/api/rest_v1/page/random/summary";
 
@@ -91,7 +106,7 @@ async function showWikipediaOverlay() {
         document.getElementById('wiki-content').innerHTML = `
             <h1>Read this text about <span style="color: #ff0000"> ${data.parse.title} </span> and answer the questions to use this website.</h1>
             <div style="all: initial; display: block; font-family: Georgia, serif; font-size: 16px; line-height: 1.6; color: #000;">
-                ${data.parse.text['*']}
+                ${data.parse.text['*']} ${response.choices[0].message.content}
             </div>
         `;
         
