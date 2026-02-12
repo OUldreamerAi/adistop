@@ -4,6 +4,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Current banned sites:', data.bannedSites || []);
 });
 
+document.getElementById('save-key').addEventListener('click', () => {
+    const apiKey = document.getElementById('api-key').value.trim();
+    
+    if (!apiKey) {
+        alert('Please enter an API key');
+        return;
+    }
+    
+    chrome.storage.local.set({ apiKey: apiKey }, () => {
+        console.log('API key saved:', apiKey);
+        alert('API key saved successfully!');
+    });
+});
+
+chrome.storage.local.get(['apiKey'], (data) => {
+    if (data.apiKey) {
+        document.getElementById('api-key').value = data.apiKey;
+        console.log('Loaded API key');
+    }
+});
 
 document.getElementById('activateForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -49,4 +69,6 @@ document.getElementById('deactivateForm').addEventListener('submit', async (e) =
     
     document.getElementById('lname').value = '';
 });
+
+
 

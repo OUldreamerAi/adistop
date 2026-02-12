@@ -1,5 +1,4 @@
 
-import { OpenRouter } from "@openrouter/sdk";
 
 async function checkIfBanned() {
     const currentUrl = window.location.href;
@@ -45,9 +44,11 @@ function generateQuizUI(questionsText) {
     const questionBlocks = questionsText.split(/Q\d+:/).filter(q => q.trim());
     
     let quizHTML = `
-        <h2 style="all: initial; display: block; font-size: 28px; font-weight: bold; margin-bottom: 25px; color: #fff; font-family: Georgia, serif; text-align: center;">
-            Answer These Questions to Continue
-        </h2>
+        <div style="border-top: 3px solid #a2a9b1; margin-top: 30px; padding-top: 20px;">
+            <h2 style="font-family: 'Linux Libertine', Georgia, Times, serif; font-size: 24px; font-weight: normal; margin-bottom: 20px; color: #000; border-bottom: 1px solid #a2a9b1; padding-bottom: 10px;">
+                Quiz
+            </h2>
+        </div>
     `;
     
     questionBlocks.forEach((block, index) => {
@@ -58,37 +59,112 @@ function generateQuizUI(questionsText) {
         const correctAnswer = correctLine ? correctLine.split(':')[1].trim() : 'A';
         
         quizHTML += `
-            <div class="quiz-question" data-question="${index}" data-correct="${correctAnswer}" style="all: initial; display: block; background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                <p style="all: initial; display: block; font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; font-family: Georgia, serif;">
+            <div class="quiz-question" data-question="${index}" data-correct="${correctAnswer}" style="margin-bottom: 25px; padding: 15px; background: #f8f9fa; border: 1px solid #a2a9b1; border-radius: 2px;">
+                <p style="font-family: sans-serif; font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #202122;">
                     ${index + 1}. ${questionText}
                 </p>
-                <div class="options" style="all: initial; display: block;">
+                <div class="options">
         `;
         
         options.forEach(option => {
             const letter = option.charAt(0);
             const text = option.substring(2).trim();
             quizHTML += `
-                <button class="quiz-option" data-option="${letter}" style="all: initial; display: block; width: 100%; text-align: left; padding: 15px 20px; margin-bottom: 10px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; font-family: Georgia, serif; color: #333; cursor: pointer; transition: all 0.3s ease;">
-                    <span style="all: initial; display: inline; font-weight: bold; margin-right: 10px; color: #667eea;">${letter})</span> ${text}
+                <button class="quiz-option" data-option="${letter}" style="display: block; width: 100%; text-align: left; padding: 10px 15px; margin-bottom: 8px; background: white; border: 1px solid #a2a9b1; border-radius: 2px; font-size: 14px; font-family: sans-serif; color: #202122; cursor: pointer;">
+                    <strong>${letter})</strong> ${text}
                 </button>
             `;
         });
         
         quizHTML += `
-            </div>
-                <p class="feedback" style="all: initial; display: none; margin-top: 10px; padding: 10px; border-radius: 5px; font-family: Georgia, serif; font-size: 14px;"></p>
+                </div>
+                <p class="feedback" style="display: none; margin-top: 10px; padding: 8px 12px; border-radius: 2px; font-family: sans-serif; font-size: 14px;"></p>
             </div>
         `;
     });
     
     quizHTML += `
-        <button id="submit-quiz" style="all: initial; display: block; width: 100%; padding: 18px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; font-family: Georgia, serif; cursor: pointer; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); opacity: 0.5;">
-            ✓ Submit Answers (0/${questionBlocks.length})
+        <button id="submit-quiz" disabled style="display: block; width: 100%; padding: 12px; background: #36c; color: white; border: none; border-radius: 2px; font-size: 16px; font-family: sans-serif; cursor: not-allowed; margin-top: 15px; opacity: 0.6;">
+            Submit answers (0/${questionBlocks.length})
         </button>
     `;
     
     return quizHTML;
+}
+
+function attachQuizHandlers(overlay) {
+    const selectedAnswers = {};
+    let totalQuestions = 0;
+    
+    document.querySelectorAll('.quiz-question').forEach(() => totalQuestions++);
+    
+    document.querySelectorAll('.quiz-option').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const questionDiv = this.closest('.quiz-question');
+            const questionIndex = questionDiv.getAttribute('data-question');
+            const selectedOption = this.getAttribute('data-option');
+            
+            questionDiv.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.style.background = '#f8f9fa';
+                opt.style.borderColor = '#e9ecef';
+            });
+            
+            this.style.background = '#eaecf0';
+            this.style.borderColor = '#36c';
+            
+            selectedAnswers[questionIndex] = selectedOption;
+            
+            const submitBtn = document.getElementById('submit-quiz');
+            const answeredCount = Object.keys(selectedAnswers).length;
+            submitBtn.textContent = `Submit Answers (${answeredCount}/${totalQuestions})`;
+            
+            if (answeredCount === totalQuestions) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            }
+        });
+    });
+    
+    document.getElementById('submit-quiz').addEventListener('click', function(e) {
+        e.preventDefault();
+        let correctCount = 0;
+        
+        document.querySelectorAll('.quiz-question').forEach(questionDiv => {
+            const questionIndex = questionDiv.getAttribute('data-question');
+            const correctAnswer = questionDiv.getAttribute('data-correct');
+            const userAnswer = selectedAnswers[questionIndex];
+            const feedback = questionDiv.querySelector('.feedback');
+            
+            if (userAnswer === correctAnswer) {
+                correctCount++;
+                feedback.textContent = '✓ Correct!';
+                feedback.style.backgroundColor = '#d4edda';
+                feedback.style.color = '#155724';
+                feedback.style.display = 'block';
+            } else {
+                feedback.textContent = `✗ Incorrect. The correct answer was ${correctAnswer}`;
+                feedback.style.backgroundColor = '#f8d7da';
+                feedback.style.color = '#721c24';
+                feedback.style.display = 'block';
+            }
+        });
+        
+        const percentage = (correctCount / totalQuestions) * 100;
+        
+        if (percentage >= 60) {
+            setTimeout(() => {
+                overlay.remove();
+                alert('Great job! You can now access this site.');
+            }, 2000);
+        } else {
+            this.textContent = `Score: ${correctCount}/${totalQuestions} - Try Again (Need 60%)`;
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }
+    });
 }
 
 
@@ -110,7 +186,6 @@ async function showWikipediaOverlay() {
         opacity: 1;
     `;
     
-
     const wikiBox = document.createElement("div");
     wikiBox.id = "wiki-content";
     wikiBox.style.cssText = `
@@ -126,162 +201,144 @@ async function showWikipediaOverlay() {
         opacity: 1;
         z-index: 10000;
     `;
-    wikiBox.innerHTML = `<p>Loading Wikipedia article...</p>`;
+    wikiBox.innerHTML = `<p style="font-family: Georgia, serif; font-size: 18px;">Loading Wikipedia article...</p>`;
     
     overlay.appendChild(wikiBox);
     document.body.appendChild(overlay);
 
-    const client = new OpenRouter({
-        apiKey: "sk-hc-v1-84642dca3ba74c4e8e92aaada87d84ff83447ce3f33a495b97da9dfe0e4f5d82",
-        serverURL: "https://ai.hackclub.com/proxy/v1",
-    });
-
-    const airesponse = await client.chat.send({
-        model: "qwen/qwen3-32b",
-        messages: [
-    { role: "user", content: "Tell me a joke." },
-    ],
-    stream: false,
-    });
-    
-    const summaryUrl = "https://en.wikipedia.org/api/rest_v1/page/random/summary";
-
-    fetch(summaryUrl)
-    .then(response => response.json())
-    .then(data => {
-        const title = data.title;
+    try {
+        const summaryUrl = "https://en.wikipedia.org/api/rest_v1/page/random/summary";
+        const summaryResponse = await fetch(summaryUrl);
+        const summaryData = await summaryResponse.json();
+        const title = summaryData.title;
+        
         const apiUrl = `https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(title)}&format=json&origin=*`;
-        return fetch(apiUrl);
-    })
-    .then(response => response.json())
-    .then(data => {
+        const wikiResponse = await fetch(apiUrl);
+        const wikiData = await wikiResponse.json();
+        const wikiHTML = wikiData.parse.text['*'];
+        
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = wikiHTML;
+        const wikiText = tempDiv.textContent.substring(0, 3000); // First 3000 chars
+        
+        // Display article
         document.getElementById('wiki-content').innerHTML = `
             <h1 style="all: initial; display: block; font-size: 32px; font-weight: bold; margin-bottom: 20px; color: #000; font-family: Georgia, serif;">
-                Read this text about <span style="color: #ff0000; font-weight: bold;"> ${title} </span> and answer the questions to use this website.
-        </h1>
-        <div id="wiki-article" style="all: initial; display: block; font-family: Georgia, serif; font-size: 16px; line-height: 1.6; color: #000;">
-            ${fullData.parse.text['*']}
-        </div>
-        <div id="ai-questions" style="all: initial; display: block; margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <h2 style="all: initial; display: block; font-size: 28px; font-weight: bold; margin-bottom: 20px; color: #fff; font-family: Georgia, serif; text-align: center;">
-                Answer These Questions to use this webite
-            </h2>
-            <p style="all: initial; display: block; font-size: 18px; margin-bottom: 10px; color: #fff; font-family: Georgia, serif; text-align: center;">
+                Read this text about <span style="color: #ff0000; font-weight: bold;">${title}</span> and answer the questions to use this website.
+            </h1>
+            <div id="wiki-article" style="all: initial; display: block; font-family: Georgia, serif; font-size: 16px; line-height: 1.6; color: #000;">
+                ${wikiHTML}
+            </div>
+            <div id="ai-questions" style="margin-top: 30px; padding: 15px; background: #f8f9fa; border: 1px solid #a2a9b1; border-radius: 2px;">
+                <p style="font-family: sans-serif; font-size: 14px; color: #202122; text-align: center;">
                 Generating questions...
-            </p>
-        </div>
-`;
+                </p>
+            </div>
+        `;
         
+        // Style Wikipedia content
         const wikiContent = document.getElementById('wiki-content');
         
+        wikiContent.querySelectorAll('*').forEach(element => {
+            element.style.opacity = '1';
+            element.style.filter = 'none';
+            element.style.fontFamily = 'Georgia, serif';
+            element.style.lineHeight = '1.6';
+            element.style.color = '#000';
+            element.style.backgroundColor = 'transparent';
+        });
+        
+        wikiContent.querySelectorAll('p').forEach(p => {
+            p.style.fontSize = '16px';
+            p.style.marginBottom = '1em';
+            p.style.display = 'block';
+        });
+        
+        wikiContent.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(h => {
+            h.style.fontWeight = 'bold';
+            h.style.display = 'block';
+        });
+        
+        wikiContent.querySelectorAll('img').forEach(img => {
+            img.style.opacity = '1';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+        });
+        
+        wikiContent.querySelectorAll('a').forEach(link => {
+            link.style.color = '#0645ad';
+            link.style.textDecoration = 'underline';
+            let href = link.getAttribute('href');
+            if (href && href.startsWith('/wiki/')) {
+                link.setAttribute('href', `https://en.wikipedia.org${href}`);
+            }
+            link.setAttribute('target', '_blank');
+        });
 
-    wikiContent.querySelectorAll('*').forEach(element => {
-        element.style.opacity = '1';
-        element.style.filter = 'none';
-        element.style.fontFamily = 'Georgia, serif';
-        element.style.lineHeight = '1.6';
-        element.style.color = '#000';
-        element.style.backgroundColor = 'transparent';
-    });
-    
+        wikiContent.querySelectorAll('span').forEach(span => {
+            span.style.color = '#000';
+            span.style.fontWeight = "900";
+        });
 
-    wikiContent.querySelectorAll('p').forEach(p => {
-        p.style.fontSize = '16px';
-        p.style.marginBottom = '1em';
-        p.style.display = 'block';
-    });
-    
- 
-    wikiContent.querySelectorAll('h1').forEach(h => {
-        h.style.fontSize = '32px';
-        h.style.fontWeight = 'bold';
-        h.style.marginTop = '1em';
-        h.style.marginBottom = '0.5em';
-        h.style.display = 'block';
-    });
-    
-    wikiContent.querySelectorAll('h2').forEach(h => {
-        h.style.fontSize = '28px';
-        h.style.fontWeight = 'bold';
-        h.style.marginTop = '1em';
-        h.style.marginBottom = '0.5em';
-        h.style.display = 'block';
-    });
-    
-    wikiContent.querySelectorAll('h3').forEach(h => {
-        h.style.fontSize = '24px';
-        h.style.fontWeight = 'bold';
-        h.style.marginTop = '0.8em';
-        h.style.marginBottom = '0.4em';
-        h.style.display = 'block';
-    });
-    
-    wikiContent.querySelectorAll('h4').forEach(h => {
-        h.style.fontSize = '20px';
-        h.style.fontWeight = 'bold';
-        h.style.marginTop = '0.8em';
-        h.style.marginBottom = '0.4em';
-        h.style.display = 'block';
-    });
-    
-    wikiContent.querySelectorAll('h5, h6').forEach(h => {
-        h.style.fontSize = '18px';
-        h.style.fontWeight = 'bold';
-        h.style.marginTop = '0.8em';
-        h.style.marginBottom = '0.4em';
-        h.style.display = 'block';
-    });
-    
 
-    wikiContent.querySelectorAll('img').forEach(img => {
-        img.style.opacity = '1';
-        img.style.filter = 'none';
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        img.style.display = 'block';
-        if (img.getAttribute('data-src')) {
-            img.src = img.getAttribute('data-src');
-        }
-    });
-    
+        
+const prompt = `Based on this Wikipedia article about "${title}", generate exactly 5 multiple choice questions. Format each question EXACTLY like this:
 
-wikiContent.querySelectorAll('a').forEach(link => {
-    link.style.color = '#0645ad';
-    link.style.opacity = '1';
-    link.style.textDecoration = 'underline';
-    link.style.fontSize = '16px';
-    
-    let href = link.getAttribute('href');
-    if (href && href.startsWith('/wiki/')) {
-        link.setAttribute('href', `https://en.wikipedia.org${href}`);
-    } else if (href && href.startsWith('#')) {
-        link.removeAttribute('href');
-        link.style.cursor = 'default';
-        link.style.textDecoration = 'none';
-        link.style.color = '#000';
+Q1: [Question text here]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [A, B, C, or D]
+
+Q2: [Question text here]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [A, B, C, or D]
+
+Q3: [Question text here]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [A, B, C, or D]
+
+Q4: [Question text here]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [A, B, C, or D]
+
+Q5: [Question text here]
+A) [Option A]
+B) [Option B]
+C) [Option C]
+D) [Option D]
+Correct: [A, B, C, or D]
+
+Article text:
+${wikiText}`;
+
+        chrome.runtime.sendMessage(
+            { action: "generateQuestions", prompt: prompt },
+            (response) => {
+                if (response.success) {
+                    const questionsText = response.data.choices[0].message.content;
+                    const quizHTML = generateQuizUI(questionsText);
+                    document.getElementById('ai-questions').innerHTML = quizHTML;
+                    attachQuizHandlers(overlay);
+                } else {
+                    throw new Error(response.error);
+                }
+            }
+        );
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('wiki-content').innerHTML = `<p style="color: red;">Error loading content. Please try again.</p>`;
     }
-    
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener noreferrer');
-});
-    
-
-    wikiContent.querySelectorAll('ul, ol').forEach(list => {
-        list.style.marginLeft = '2em';
-        list.style.marginBottom = '1em';
-        list.style.display = 'block';
-        list.style.fontSize = '16px';
-    });
-    
-    wikiContent.querySelectorAll('li').forEach(li => {
-        li.style.display = 'list-item';
-        li.style.marginBottom = '0.5em';
-        li.style.fontSize = '16px';
-    });
-    })
-    .catch(e => {
-        document.getElementById('wiki-content').innerText = "Failed to load Wikipedia article.";
-    });
 }
 
 checkIfBanned().then(isBanned => {

@@ -1,12 +1,17 @@
-
-
 {
     "manifest_version": 3,
     "name": "Adistop",
     "version": "1.0",
     "description": "A chrome extension, which stops you from entering websites like youtube and makes you first read a wikipedia article and answer questions about it.",
     "permissions": ["activeTab", "scripting", "tabs", "storage", "alarms"],
-    "host_permissions": ["<all_urls>"],
+    "host_permissions": [
+        "<all_urls>",
+        "https://ai.hackclub.com/*",
+        "https://en.wikipedia.org/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
     "action": { "default_popup": "popup.html" },
     "icons": {
         "16": "images/icon-16.png",
