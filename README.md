@@ -6,10 +6,10 @@ This is a chrome exetension which makes you read a random wikibedia page and ans
 - Now when you open a website you banned it gives you a wikibedia article on top of that websites. The idea is you read the article and then aswer specific questions about the text made by Ai. If you get a big enough part of the questions right yay you can use the website you banned (just dont restart the website) but if you dont get enough questions correct then you gota read a new wikibedia article yay. And yes its a random wikibedia article in english. 
 
 How to install? (You gota be 18-13 to do this fro free)
-- download the files and make sure they are in a folder
-- go to chrome://extensions it works also on some other browsers than chrome like brave
+- download the crx file 
+- go to chrome://extensions in your adress bar
 - Enable Developer Mode by clicking the toggle switch next to Developer mode
-- Click the Load unpacked button and select the extension directory
+- open the folder on yout computer where your crx file is save and literally drag it anywhare on that chrome exetension bage
 
 wow you have it instaled but we still got work to do
 
