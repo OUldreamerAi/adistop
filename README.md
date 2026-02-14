@@ -15,3 +15,5 @@ wow you have it instaled but we still got work to do
 
 - open the exetension in the exetension menu the icon looks like a puzle piece.
 - (if you are 13-18) go to https://ai.hackclub.com log in and get yourself a api key the broser exetension will aks for it
+
+<video src="path/to/video.mp4" width="320" height="240" controls></video>
